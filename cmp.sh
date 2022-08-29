@@ -1,7 +1,9 @@
 
-# chmod u+x cmp.sh
-# Si se usa el generador de Marsaglia reemplzar mtmod.f90 por mzran.f90
+# Compilation script used to create executable file
 
+
+# chmod u+x cmp.sh
+# Uses Mersenne-Twister module for random number generation
 
  gfortran precision.f90 \
           mtmod.f90 \
