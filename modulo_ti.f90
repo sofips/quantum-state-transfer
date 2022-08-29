@@ -8,8 +8,8 @@
 !---------------------------------------------------
  subroutine inicializar(J,J_0)
 !---------------------------------------------------
-!Inicializa los acoplamientos entre spines,
-!como J=1 si n=3, si n>3 en funcion de los anteriores
+!Initialize couplings,
+!as J=1 for n=3, and based on the previous ones for the rest
 !--------------------------------------------------
  real(pr), dimension(:), intent(inout) :: J, J_0
  integer                               :: n_j,i
@@ -33,8 +33,10 @@
  end subroutine
 
 !------------------------------------------------ 
- subroutine grad(m,H,J,gm)
+ subroutine grad(m,H,J,gm) 
 !------------------------------------------------
+! Loss function and gradient calculation
+!-----------------------------------------------
  real(pr), dimension(:), intent(in)      :: J
  real(pr), dimension(:,:), intent(inout) :: H
  integer, intent(in)                     :: m
@@ -42,23 +44,21 @@
  real(pr), dimension(size(J))            :: Jp, Jl
  real(pr)                                :: beta, lambda, Lp, Ll, Fp, Fl
  integer                                 :: n_h
- !defino los parametros--------
+ 
   
   beta   = 0.5_pr
   lambda = 1E-6_pr
   n_h    = size(H,1)
- !------------------------------- 
- !calculo la variacion
- !-------------------------------
-   Jp= J
+
+  Jp= J
   
-   Jp(m) = J(m) + beta  
+  Jp(m) = J(m) + beta  
  
-   Jl= J
+  Jl= J
  
-   Jl(m) = J(m) - beta  
+  Jl(m) = J(m) - beta  
  !------------------------------------------------------------
- !calculo la fidelidad y la funcion de perdida con variaciones
+ ! Fidelity and loss functions
  !-------------------------------------------------------------
   call fidelidad(Jp,H,n_h,Fp)
   
@@ -68,7 +68,7 @@
    
    Ll = 1-Fl+lambda*maxval(Jl)
  !----------------------------------------
- !calculo el gradiente de la fn de perdida
+ ! Loss function gradient for gradient descent
  !----------------------------------------
    gm = (Lp - Ll)/(2._pr*beta)
    
@@ -88,34 +88,30 @@
  real(pr)                                :: Fr, Fi
  
   !-----------------------------------------------------
-  !construyo el hamiltoniano con los acoplamientos dados
+  ! Build Hamiltonian Matrix
   !------------------------------------------------------
    call hamiltoniano(J,H)
  
-  !Para calcular F, necesito autovalores y autovectores, uso dsyev de las lib. Lapack
   
   !-----------------------------------------------------------------------
-  !'V' calcula los autovalores, 'U' se guarda solo la triangular superior
+  ! Use lapack libraries to diagonalize Hamiltonian
   !-----------------------------------------------------------------------
    JOBZ = 'V'
    UPLO = 'U'
   !-----------------------------------
-  !genera un espacio de trabajo
+  ! Generate optimal workspace
   !-----------------------------------
    lwmax = 10000
    lwork = 5
    allocate(work(lwmax))
-  
-  !----------------------------------
-  !optimizar el espacio de trabajo
-  !------------------------------------
+ 
    lwork = -1
  
    call dsyev( JOBZ,  UPLO, n_h, H, n_h, w, work, lwork, INFO )
  
    lwork = work(1) 
   !-----------------------------------------
-  !diagonalizar la matriz
+  ! calculate eigenvectors and eigenvalues
   !-----------------------------------------
    call dsyev( JOBZ,  UPLO, n_h, H, n_h, w, WORK, lwork, INFO )
  
@@ -139,7 +135,7 @@
  end subroutine fidelidad
   
 !---------------------------------------------------
- subroutine hamiltoniano(J,H)
+ subroutine hamiltoniano(J,H) ! generation of xx hamiltonian 
 !---------------------------------------------------
   real(pr), dimension(:), intent(in)      :: J
   real(pr), dimension(:,:), intent(inout) :: H
