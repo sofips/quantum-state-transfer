@@ -19,7 +19,7 @@
  open (13,file='eff.dat',status='unknown',form='formatted')
 
  !--------------------------------------
- !Definicion de parametros del programa
+ !Parameter definition
  !--------------------------------------
   alpha = 0.05
   tol   = 1E-4_pr
@@ -28,7 +28,7 @@
   allocate (J0(3))
 
  !-------------------------------------
- !loop sobre tamaños de los sistemas
+ !Loop over system's dimensions
  !-------------------------------------
  
  
@@ -40,23 +40,23 @@
       
       allocate(J(1:n_j), H(1:n_h,1:n_h))
      
-      call inicializar(J,J0) !inicializo los acoplamientos
+      call inicializar(J,J0) !initialize couplings
 
      
       !write(*,*) J, J0
       
       do k = 1, kmax
         
-          m = int(grnd()*n_j)+1 !selecciona el acoplamiento que varia
+          m = int(grnd()*n_j)+1 !choose random coupling to modify
                 
-          call grad(m,H,J,gm) !calcula el gradiente asociado a variar ese acoplamiento
+          call grad(m,H,J,gm) !calculates associated gradient
                 
-          J(m) = J(m)-alpha*gm !modifica el spin elegido
+          J(m) = J(m)-alpha*gm !modifies chosen coupling
         
-          call fidelidad(J,H,n_h,F) !calcula la nueva fidelidad
+          call fidelidad(J,H,n_h,F) !recalculates fidelity
           
           !------------------------------------------------------
-          !archivo de evolucion de infidelidad
+          ! generates fidelity evolution file 
           !------------------------------------------------------
            write(aux,'(I15)') n_h
            filename2 = 'evol_' // trim(adjustl(aux))//'.dat'
@@ -65,17 +65,17 @@
           !---------------------------------------------------------
           
           
-        if ((1._pr-F) < tol) exit !corta si alcanza la tolerancia preestablecida
+        if ((1._pr-F) < tol) exit !  tolerance check
         
       end do  
       
       
-      write(7,*) n_h, 1-F  !infidelidad minima alcanzada vs n
+      write(7,*) n_h, 1-F 
            
-      write(13,'(I15,2E16.8)') n_h, maxval(J), acos(-1._pr)*n_h*4  !eficiencia
+      write(13,'(I15,2E16.8)') n_h, maxval(J), acos(-1._pr)*n_h*4  !efficiency file
 
       !----------------------------------------------------------------
-      !acoplamientos finales alcanzados en archivo J_n
+      ! Final couplings file
       !----------------------------------------------------------------
       
        write(aux,'(I15)') n_h
@@ -86,7 +86,7 @@
             write(9,*) i,J(i)
        end do
       !------------------------------------------------------------- ---------------
-      !almacena los viejos acoplamientos en un el vector J0 para inicializar los sgtes
+      !saves previous couplings to initialize next dimension
       !--------------------------------------------------------------------------------
       
        deallocate(J0) 
